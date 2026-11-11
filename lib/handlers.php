@@ -43,8 +43,10 @@ function page_vcf(string $slug): void
     $photo = fetch_image($urls[0]) ?? fetch_image($urls[1]);
     $vcf = build_vcard($s, $s['company'], $photo, base_url() . '/c/' . $s['slug']);
     public_cache();
-    header('Content-Type: text/vcard; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $s['slug'] . '.vcf"');
+    // text/x-vcard + inline lets Android browsers hand the file straight to the
+    // Contacts app (no "open the download" step); iOS Safari shows the contact as before.
+    header('Content-Type: text/x-vcard; charset=utf-8');
+    header('Content-Disposition: inline; filename="' . $s['slug'] . '.vcf"');
     header('Content-Length: ' . strlen($vcf));
     echo $vcf;
 }
