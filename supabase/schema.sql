@@ -10,6 +10,7 @@ create table if not exists public.companies (
   website     text,
   facebook    text,
   address     text,
+  products    text,           -- one per line: "Name" or "Name | https://link"
   brand_color text not null default '#0b5cad',
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -34,6 +35,9 @@ create table if not exists public.staff (
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+
+-- Added later: safe to run on an existing database.
+alter table public.companies add column if not exists products text;
 
 create index if not exists staff_company_idx on public.staff(company_id);
 

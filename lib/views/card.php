@@ -64,6 +64,18 @@ $viber = $s['viber'] ? preg_replace('/[^0-9+]/', '', $s['viber']) : null;
       <?php endif; ?>
     </ul>
 
+    <?php if ($products): ?>
+      <h2 class="vc-section">Our products</h2>
+      <ul class="vc-products">
+        <?php foreach ($products as $pr): ?>
+          <li><?php if ($pr['url']): ?><a href="<?= e($pr['url']) ?>" target="_blank" rel="noopener"><?= e($pr['name']) ?> ↗</a><?php else: ?><span><?= e($pr['name']) ?></span><?php endif; ?></li>
+        <?php endforeach; ?>
+      </ul>
+    <?php endif; ?>
+    <?php if (!empty($c['website'])): ?>
+      <a class="btn block vc-site" href="<?= e($c['website']) ?>" target="_blank" rel="noopener">Visit our website ↗</a>
+    <?php endif; ?>
+
     <?php if ($s['notes']): ?><p class="vc-note"><?= nl2br(e($s['notes'])) ?></p><?php endif; ?>
   </section>
 

@@ -4,7 +4,7 @@
 </div>
 
 <div class="qr-layout" id="qr-app"
-     data-card="<?= e($cardUrl) ?>" data-vcf="<?= e($vcfUrl) ?>"
+     data-card="<?= e($cardUrl) ?>" data-vcf="<?= e($vcfUrl) ?>" data-contact="<?= e($contact) ?>"
      data-logo="<?= e($c['logo_url'] ?? '') ?>" data-color="<?= e(hex_color((string) $c['brand_color'])) ?>"
      data-name="<?= e($s['slug']) ?>">
   <div class="card qr-preview">
@@ -20,10 +20,18 @@
     <h2>Customize</h2>
     <label>When scanned, open
       <select name="target">
-        <option value="card">Card page (photo, info, Save contact button)</option>
-        <option value="vcf">Contact file directly (.vcf)</option>
+        <option value="contact">Contact details (scanner shows name, phones → Import contact)</option>
+        <option value="vcf">Contact file .vcf (imports with logo / photo picture)</option>
+        <option value="card">Card page (photo, info, products, website)</option>
       </select>
     </label>
+    <label data-for="vcf">Contact picture
+      <select name="picture">
+        <option value="logo">Company logo</option>
+        <option value="photo">Staff photo</option>
+      </select>
+    </label>
+    <p class="muted small-text" data-for="contact">The contact is stored inside the QR, so it works offline. A QR cannot hold a picture, so the contact circle stays empty. To get the logo in the contact circle, choose “Contact file .vcf”.</p>
     <div class="two">
       <label>Dot style
         <select name="dots">
@@ -48,7 +56,7 @@
     <label>Download size
       <select name="size"><option value="600">600 px</option><option value="1200" selected>1200 px (print)</option><option value="2400">2400 px (large print)</option></select>
     </label>
-    <p class="muted">Tip: the QR only holds a short link, so it stays simple and scans fast even on small business cards. Test it with your phone camera before printing.</p>
+    <p class="muted">Tip: link-based QRs (.vcf / card page) stay simple and let you edit details later without reprinting. Test with your phone camera before printing.</p>
   </form>
 </div>
 

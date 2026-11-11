@@ -29,6 +29,8 @@
         <label>Facebook page<input name="facebook" value="<?= e($c['facebook'] ?? '') ?>" placeholder="facebook.com/yourpage"></label>
       </div>
       <label>Address<textarea name="address" rows="2"><?= e($c['address'] ?? '') ?></textarea></label>
+      <label>Products / services <small class="muted">(one per line, optional link: <code>Diesel | example.com/diesel</code>)</small>
+        <textarea name="products" rows="4" placeholder="Diesel&#10;Lubricants | example.com/lubricants"><?= e($c['products'] ?? '') ?></textarea></label>
       <label class="color">Brand color <input type="color" name="brand_color" value="<?= e(hex_color((string) ($c['brand_color'] ?? ''))) ?>"></label>
     </div>
   </div>

@@ -26,6 +26,7 @@ function page_card(string $slug): void
         'staff' => $s,
         'company' => $s['company'],
         'phones' => all_phones($s, $s['company']),
+        'products' => parse_products($s['company']['products'] ?? ''),
         'cardUrl' => base_url() . '/c/' . $s['slug'],
         'vcfUrl' => '/c/' . $s['slug'] . '.vcf',
     ], null);
@@ -34,7 +35,12 @@ function page_card(string $slug): void
 function page_vcf(string $slug): void
 {
     $s = find_card($slug);
-    $photo = fetch_image($s['photo_url'] ?? null) ?? fetch_image($s['company']['logo_url'] ?? null);
+    // Contact picture: company logo by default, ?p=photo prefers the staff photo.
+    $urls = [$s['company']['logo_url'] ?? null, $s['photo_url'] ?? null];
+    if (($_GET['p'] ?? '') === 'photo') {
+        $urls = array_reverse($urls);
+    }
+    $photo = fetch_image($urls[0]) ?? fetch_image($urls[1]);
     $vcf = build_vcard($s, $s['company'], $photo, base_url() . '/c/' . $s['slug']);
     public_cache();
     header('Content-Type: text/vcard; charset=utf-8');
@@ -102,6 +108,7 @@ function admin_company_save(): void
         'website' => normalize_url(post('website')) ?: null,
         'facebook' => normalize_url(post('facebook')) ?: null,
         'address' => post('address') ?: null,
+        'products' => post('products') ?: null,
         'brand_color' => hex_color(post('brand_color')),
         'updated_at' => gmdate('c'),
     ];
@@ -115,6 +122,9 @@ function admin_company_save(): void
     $old = $isNew ? null : db_first('companies', 'id=eq.' . $id);
     if (!$isNew && !$old) {
         throw new HttpError('Company not found.', 404);
+    }
+    if ($data['products'] === null && !array_key_exists('products', $old ?? [])) {
+        unset($data['products']); // keeps saving working before the products column exists
     }
     if ($isNew) {
         $id = uuid4();
@@ -269,5 +279,6 @@ function admin_staff_qr(string $id): void
         'company' => $s['company'],
         'cardUrl' => base_url() . '/c/' . $s['slug'],
         'vcfUrl' => base_url() . '/c/' . $s['slug'] . '.vcf',
+        'contact' => build_vcard($s, $s['company'], null, base_url() . '/c/' . $s['slug'], true),
     ]);
 }

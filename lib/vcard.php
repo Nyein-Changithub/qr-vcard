@@ -39,7 +39,24 @@ function all_phones(array $staff, array $company): array
     return $phones;
 }
 
-function build_vcard(array $s, array $c, ?array $photo, string $cardUrl): string
+/** Company products, one per line: "Name" or "Name | https://link". */
+function parse_products(?string $text): array
+{
+    $out = [];
+    foreach (preg_split('/\R/u', (string) $text) ?: [] as $line) {
+        [$name, $link] = array_map('trim', explode('|', $line, 2)) + [1 => ''];
+        if ($name !== '') {
+            $out[] = ['name' => $name, 'url' => $link !== '' ? normalize_url($link) : null];
+        }
+    }
+    return $out;
+}
+
+/**
+ * $compact = true builds the short version that is stored inside the QR itself
+ * (no photo, note or folding), so scanner apps show the contact with "Import contact".
+ */
+function build_vcard(array $s, array $c, ?array $photo, string $cardUrl, bool $compact = false): string
 {
     $parts = preg_split('/\s+/u', trim((string) $s['full_name'])) ?: [];
     $family = count($parts) > 1 ? array_pop($parts) : '';
@@ -65,13 +82,20 @@ function build_vcard(array $s, array $c, ?array $photo, string $cardUrl): string
     if ($addr) {
         $L[] = 'ADR;TYPE=WORK:;;' . vc_escape($addr) . ';;;;';
     }
-    if (!empty($c['website'])) {
-        $L[] = 'URL;TYPE=WORK:' . vc_escape($c['website']);
+    $L[] = 'URL;TYPE=WORK:' . vc_escape(($c['website'] ?? '') ?: $cardUrl);
+    $products = implode(', ', array_column(parse_products($c['products'] ?? ''), 'name'));
+    if ($compact) {
+        if ($products !== '') {
+            $L[] = 'NOTE:' . vc_escape('Products: ' . $products);
+        }
+        $L[] = 'END:VCARD';
+        return implode("\n", $L);
     }
     if (!empty($c['facebook'])) {
         $L[] = 'X-SOCIALPROFILE;TYPE=facebook:' . vc_escape($c['facebook']);
     }
-    $note = trim(($s['notes'] ?? '') . "\n" . ($c['tagline'] ?? '') . "\nCard: " . $cardUrl);
+    $note = trim(($s['notes'] ?? '') . "\n" . ($c['tagline'] ?? '')
+        . ($products !== '' ? "\nProducts: " . $products : '') . "\nCard: " . $cardUrl);
     $L[] = 'NOTE:' . vc_escape($note);
     if ($photo) {
         $L[] = 'PHOTO;ENCODING=b;TYPE=' . $photo[1] . ':' . base64_encode($photo[0]);

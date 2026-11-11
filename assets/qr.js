@@ -6,11 +6,22 @@
   f('color').value = app.dataset.color;
   f('corner_color').value = app.dataset.color;
 
+  // The bundled QR encoder writes one byte per char code, so pass UTF-8 bytes
+  // (keeps Myanmar / Unicode text in the contact readable).
+  const utf8 = (s) => unescape(encodeURIComponent(s));
+
   function options() {
-    const data = f('target').value === 'vcf' ? app.dataset.vcf : app.dataset.card;
+    const target = f('target').value;
+    document.querySelectorAll('[data-for]').forEach((el) => { el.hidden = el.dataset.for !== target; });
+    let data = app.dataset.card;
+    if (target === 'vcf') data = app.dataset.vcf + (f('picture').value === 'photo' ? '?p=photo' : '');
+    if (target === 'contact') data = app.dataset.contact;
     const size = Number(f('size').value);
     const useLogo = f('logo').checked && !f('logo').disabled && app.dataset.logo;
-    document.getElementById('qr-data').textContent = data;
+    document.getElementById('qr-data').textContent = target === 'contact'
+      ? 'Contact card · ' + utf8(data).length + ' bytes'
+      : data;
+    data = utf8(data);
     return {
       width: size, height: size, type: 'canvas', data, margin: Math.round(size * 0.04),
       image: useLogo ? app.dataset.logo : undefined,

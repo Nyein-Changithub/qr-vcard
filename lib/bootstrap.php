@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 const ROOT = __DIR__ . '/..';
-const ASSET_V = '1';
+const ASSET_V = '2';
 const AUTH_COOKIE = 'sc_admin';
 
 final class HttpError extends Exception
